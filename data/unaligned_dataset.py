@@ -54,11 +54,50 @@ class UnalignedDataset(BaseDataset):
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
-        A_img = Image.open(A_path).convert('RGB')
-        B_img = Image.open(B_path).convert('RGB')
-        # apply image transformation
+        #print('sss',A_path)
+        
+
+        # with rawpy.imread(A_path) as raw:
+        #     A_img = raw.postprocess(use_camera_wb=True,  use_auto_wb=False,exp_shift=3 )
+
+        
+        # with rawpy.imread(B_path) as raw:
+        #     B_img = raw.postprocess(use_camera_wb=True,  use_auto_wb=False,exp_shift=3 )
+
+        if 'ARW' in A_path:
+            raw = rawpy.imread(A_path)
+            # input_full = np.expand_dims(input(raw),axis=0) *ratio	
+            A_img = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
+            # A_img = Image.open(A_img).convert('RGB')
+            #print(A_img)
+            #PIL_image = Image.fromarray(A_img)
+            #print(tmp)
+            A_img = Image.fromarray(np.uint8(A_img))
+        
+        else:
+             A_img = Image.open(A_path).convert('RGB')
+
+        if 'ARW' in B_path:
+            raw = rawpy.imread(B_path)
+            # input_full = np.expand_dims(input(raw),axis=0) *ratio	
+            B_img = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
+            # B_img = Image.open(B_img).convert('RGB')
+            B_img = Image.fromarray(np.uint8(B_img))
+
+        else:
+            B_img = Image.open(B_path).convert('RGB')
+
         A = self.transform_A(A_img)
         B = self.transform_B(B_img)
+
+        
+        #PIL_image = Image.fromarray(B_img)
+        #print(B_img.shape)
+
+
+
+ 
+        # apply image transformation
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
